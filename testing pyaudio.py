@@ -23,7 +23,8 @@ chunk = 1024 * 4
 #this allows us to open the audio file(wav file) and store it in a variable
 #rb is the command working in "read" mode in which they interpret the code
 #the information before it is the directory to find the music
-wf = wave.open ( 'C://Users//danie//Music//fukashigi no carte (kosu remix).wav' , 'rb')
+#Remember you \\ example 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav'
+wf = wave.open ( 'put your path here' , 'rb')
 
 
 #[Portaudio system]
@@ -89,7 +90,7 @@ while data != '':
 #struct is unpacking binary data into str and we inserted a certain amount of code, in this case we inserted the entirety of the audio file which is 4 chunks long.
 data_int = struct.unpack(str(4*chunk))
 
-p.stream.close()
+# p.stream.close()
 
 
 
