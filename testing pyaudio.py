@@ -89,7 +89,8 @@ while data != '':
 #struct is unpacking binary data into str and we inserted a certain amount of code, in this case we inserted the entirety of the audio file which is 4 chunks long.
 data_int = struct.unpack(str(4*chunk))
 
-p.stream.close()
+stream.close()
+#vhgjyg
 
 
 
