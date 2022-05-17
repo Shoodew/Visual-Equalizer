@@ -24,7 +24,7 @@ chunk = 1024 * 4
 #rb is the command working in "read" mode in which they interpret the code
 #the information before it is the directory to find the music
 #Remember you \\ example 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav'
-wf = wave.open ( 'put your path here' , 'rb')
+wf = wave.open ( 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav' , 'rb')
 
 
 #[Portaudio system]
