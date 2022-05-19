@@ -85,11 +85,11 @@ print(len(data))
 # 'b' = bytes in this case, i think we are telling the command that this data is in bytes.
 # dtype also tells the program the type of element/data is used in our array
 #And our buffer is located in data
-#//data_int = np.array(struct.unpack(str(4*chunk) + 'B', data), dtype ='b' )
+data_int = np.array(struct.unpack(str(4*chunk) + 'B', data), dtype ='b' )
 
 #the result should provide a tuple.
 # a tuple is just combining all the information/elements in the conversion around parentheses
-#print(data_int)
+#//print(data_int)
 
 #Creating graph object
 #plt is matploblib but shortened as shown at the top of the file
@@ -107,21 +107,28 @@ fig, ax = plt.subplots()
 #The first number indicate where it starts, so at 0 
 #The second number indicates where the last number is which is 8 chunks long
 # and the third tells the array how many steps/numbers each element in the array is increased by in intervals, but i deleted it since we dont need them in intervals
+#ax.plot just adds data, so x cords and y cords
 
 x = np.arange(0, 4 * chunk)
-line, = ax.plot(x , np.random.rand(4 * chunk) )
+line, = ax.plot(x , data_int )
 ax.set_ylim(0,255)
 ax.set_xlim(0,chunk)
 
-while True:
-    for x in range(4):
-        data_1 = stream.read(chunk)
-        data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data_1) , dtype ='b' )
+plt.show(block = False)
+
+c = 1
+
+
+while c==1:
+    stream.write(data)
+    data = wf.readframes(chunk)
+    if(data != '') :
+        data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
         line.set_ydata(data_int)
         fig.canvas.draw()
         fig.canvas.flush_events()
-
-
+    else :
+        c = 0
 
 
 #[play stream]
