@@ -3,7 +3,7 @@ import wave
 import sys
 import audioop
 import numpy as np
-import matplotlib
+import matplotlib.pyplot as plt
 import struct
 
 #[Description of chunks]
@@ -11,6 +11,12 @@ import struct
 #imports pt 2 - numpy is used in conjunction with arrays,they supposedly speed up the ability of python to use an array by 50x.
 #imports pt 3 - audioop is used to calculate and manipulate audio fragment data coming from the audio file and the hardware
 #import pt 4 - struct is used to convert python native data to binary and vice versa
+
+#[Links]
+#NumPy - https://numpy.org/doc/stable/user/absolute_beginners.html
+
+
+
 
 
 # [Chunk]
@@ -24,6 +30,7 @@ chunk = 1024 * 4
 #rb is the command working in "read" mode in which they interpret the code
 #the information before it is the directory to find the music
 #Remember you \\ example 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav'
+
 wf = wave.open ( 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav' , 'rb')
 
 
@@ -48,14 +55,16 @@ stream = p.open(format =
                 p.get_format_from_width(wf.getsampwidth()),
                 channels = wf.getnchannels(),
                 rate = wf.getframerate(),
-                output = True)
+                output = True,
+                frames_per_buffer = chunk
+                )
 
 
 #[Reading data]
 #In this command I believe we are now trying to interpret the audio of the frames with in the packages/chunks 
 
 data = wf.readframes(chunk)
-rms = audioop.rms(data,2)
+#rms = audioop.rms(data,2)
 
 
 #[Length]
@@ -66,15 +75,73 @@ print(format)
 print(len(data))
 
 
+
+#[Graph section]
+#To create our graph we require native python data instead of binary data, at least for me to understand. Most of the data in our python code is binary since that is the data being given to the computer to understand on its own computational level.
+# some of the imports/libraries in python 3.x work in bytes, so struct comes handy in this situation
+
+#struct is unpacking binary data into str and we inserted a certain amount of code, in this case we inserted the entirety of the audio file which is 4 chunks long.
+#According to the website, 'struct.unpack' takes two arguments of the format or desired format and the buffer (holding place)
+#in our case, the format we want from unpacking is a string that is the length of 4 chunks/16384 samples. 
+# 'b' = bytes in this case, i think we are telling the command that this data is in bytes.
+# dtype also tells the program the type of element/data is used in our array
+#And our buffer is located in data
+data_int = np.array(struct.unpack(str(4*chunk) + 'B', data), dtype ='b' )
+
+#the result should provide a tuple.
+# a tuple is just combining all the information/elements in the conversion around parentheses
+#//print(data_int)
+
+#Creating graph object
+#plt is matploblib but shortened as shown at the top of the file
+#subplotts is a method used to create plots with parameters of rows and columms, and an id/number associated with the graph
+#fig helps to tell the program that we creating a template, and then the ax tells the program that we are creating a square/cell, in which the subplots are there to create the x and y axis
+fig, ax = plt.subplots()
+
+
+
+#Creating an animated graph
+#Instead of creating a new graph everytime, we will try to update the lines/data itself in the graph instead.
+#NumPy/np is there to create an array 
+#the method arange is used to tell the array how long the array should be, or the range in this case
+#This arange() method is used to create an array that holds specific conditions
+#The first number indicate where it starts, so at 0 
+#The second number indicates where the last number is which is 8 chunks long
+# and the third tells the array how many steps/numbers each element in the array is increased by in intervals, but i deleted it since we dont need them in intervals
+#ax.plot just adds data, so x cords and y cords
+
+x = np.arange(0, 4 * chunk)
+line, = ax.plot(x , data_int )
+ax.set_ylim(0,255)
+ax.set_xlim(0,chunk)
+
+plt.show(block = False)
+
+c = 1
+
+
+while c==1:
+    stream.write(data)
+    data = wf.readframes(chunk)
+    if(data != '') :
+        data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
+        line.set_ydata(data_int)
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+    else :
+        c = 0
+
+
 #[play stream]
 #now we play the audio 
 
 #the stream was already formated before hand, and is set there before any of the data can be written/interpreted. The stream is established first, then the audio is interpreted from file to samples and frames, then written out and being outputed as sound. 
-#I assume since it starts the argument with "as long as the variable contains data or is not empty" it will continue to write and read/play the frames
+#I assume since it starts the argument with "as long as the variable contains data or is not empty" it will continue to write and read/play the frames until there is no data left
 
-while data != '':
-    stream.write(data)
-    data = wf.readframes(chunk)
+    #while data != '':
+        #stream.write(data)
+        #data = wf.readframes(chunk)
+
 
 #[volume]
 #now how do we manipulate the volume?
@@ -83,14 +150,7 @@ while data != '':
 #a command that can help measure power is RMS
 
 
-#[Graph section]
-#To create our graph we require native python data instead of binary data, at least for me to understand. Most of the data in our python code is binary since that is the data being given to the computer to understand on its own computational level.
-# some of the imports/libraries in python 3.x work in bytes, so struct comes handy in this situation
 
-#struct is unpacking binary data into str and we inserted a certain amount of code, in this case we inserted the entirety of the audio file which is 4 chunks long.
-data_int = struct.unpack(str(4*chunk))
-
-p.stream.close()
 
 
 
