@@ -7,7 +7,7 @@ import time
 from tkinter import TclError
 
 # use this backend to display in separate Tk window
-%matplotlib tk
+
 
 # constants
 CHUNK = 1024 * 2             # samples per frame
