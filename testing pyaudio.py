@@ -22,7 +22,7 @@ import struct
 # [Chunk]
 #the number of frames that will be set in the buffer/waiting room. Before they are sent out to be played/outputed
 #Correction - the number of samples that will be held in one chunk/portion. In this case we are holding 4096 samples in our chunk to be recorded/held to be played/outputed
-chunk = 1024 * 4
+chunk = 1024 * 2
 
 
 #[File variable]
@@ -30,7 +30,7 @@ chunk = 1024 * 4
 #rb is the command working in "read" mode in which they interpret the code
 #the information before it is the directory to find the music
 #Remember you \\ example 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav'
-wf = wave.open ( 'C:\\Users\\danie\\Documents\\Github\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav' , 'rb')
+wf = wave.open ( 'C:\\Users\\danie\\Documents\\Github\\Visual-Equalizer\\ツユ Tuyu - ルーザーガール Rūzāgāru Loser Girl.wav' , 'rb')
 
 
 #[Portaudio system]
@@ -85,11 +85,12 @@ print(len(data))
 # 'b' = bytes in this case, i think we are telling the command that this data is in bytes.
 # dtype also tells the program the type of element/data is used in our array
 #And our buffer is located in data
-data_int = np.array(struct.unpack(str(4*chunk) + 'B', data), dtype ='b' )
+data_int = np.array(struct.unpack(str( 4 * chunk) + 'B', data), dtype ='b')
 
 #the result should provide a tuple.
 # a tuple is just combining all the information/elements in the conversion around parentheses
 #//print(data_int)
+
 
 #Creating graph object
 #plt is matploblib but shortened as shown at the top of the file
@@ -111,24 +112,22 @@ fig, ax = plt.subplots()
 
 x = np.arange(0, 4 * chunk)
 line, = ax.plot(x , data_int )
-ax.set_ylim(0,255)
-ax.set_xlim(0,chunk)
+ax.set_ylim(0,150)
+ax.set_xlim(0,1024/2)
+ax.set_xlabel('samples')
+ax.set_ylabel('volume')
 
 plt.show(block = False)
 
-c = 1
 
 
-while c==1:
+while (data != ''):
     stream.write(data)
     data = wf.readframes(chunk)
-    if(data != '') :
-        data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
-        line.set_ydata(data_int)
-        fig.canvas.draw()
-        fig.canvas.flush_events()
-    else :
-        c = 0
+    data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
+    line.set_ydata(data_int)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
 
 
 #[play stream]
@@ -137,9 +136,9 @@ while c==1:
 #the stream was already formated before hand, and is set there before any of the data can be written/interpreted. The stream is established first, then the audio is interpreted from file to samples and frames, then written out and being outputed as sound. 
 #I assume since it starts the argument with "as long as the variable contains data or is not empty" it will continue to write and read/play the frames until there is no data left
 
-    #while data != '':
-        #stream.write(data)
-        #data = wf.readframes(chunk)
+    #//while data != '':
+        #//stream.write(data)
+        #//data = wf.readframes(chunk)
 
 
 #[volume]
