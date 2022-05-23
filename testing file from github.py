@@ -3,10 +3,11 @@ import os
 import struct
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.fftpack import fft
 import time
 from tkinter import TclError
 
-# use this backend to display in separate Tk window
+# to display in separate Tk window
 
 
 # constants
@@ -15,7 +16,7 @@ FORMAT = pyaudio.paInt16     # audio format (bytes per sample?)
 CHANNELS = 1                 # single channel for microphone
 RATE = 44100                 # samples per second
 # create matplotlib figure and axes
-fig, ax = plt.subplots(1, figsize=(15, 7))
+fig, (ax1, ax2) = plt.subplots(2, figsize=(15, 7))
 
 # pyaudio class instance
 p = pyaudio.PyAudio()
@@ -31,21 +32,25 @@ stream = p.open(
 )
 
 # variable for plotting
-x = np.arange(0, 2 * CHUNK, 2)
+x = np.arange(0, 2 * CHUNK, 2)       # samples (waveform)
+xf = np.linspace(0, RATE, CHUNK)     # frequencies (spectrum)
 
 # create a line object with random data
-line, = ax.plot(x, np.random.rand(CHUNK), '-', lw=2)
+line, = ax1.plot(x, np.random.rand(CHUNK), '-', lw=2)
 
-# basic formatting for the axes
-ax.set_title('AUDIO WAVEFORM')
-ax.set_xlabel('samples')
-ax.set_ylabel('volume')
-ax.set_ylim(0, 255)
-ax.set_xlim(0, 2 * CHUNK)
-plt.setp(ax, xticks=[0, CHUNK, 2 * CHUNK], yticks=[0, 128, 255])
+# create semilogx line for spectrum
+line_fft, = ax2.semilogx(xf, np.random.rand(CHUNK), '-', lw=2)
 
-# show the plot
-plt.show(block=False)
+# format waveform axes
+ax1.set_title('AUDIO WAVEFORM')
+ax1.set_xlabel('samples')
+ax1.set_ylabel('volume')
+ax1.set_ylim(0, 255)
+ax1.set_xlim(0, 2 * CHUNK)
+plt.setp(ax1, xticks=[0, CHUNK, 2 * CHUNK], yticks=[0, 128, 255])
+
+# format spectrum axes
+ax2.set_xlim(20, RATE / 2)
 
 print('stream started')
 
@@ -65,6 +70,10 @@ while True:
     data_np = np.array(data_int, dtype='b')[::2] + 128
     
     line.set_ydata(data_np)
+    
+    # compute FFT and update line
+    yf = fft(data_int)
+    line_fft.set_ydata(np.abs(yf[0:CHUNK])  / (128 * CHUNK))
     
     # update figure canvas
     try:

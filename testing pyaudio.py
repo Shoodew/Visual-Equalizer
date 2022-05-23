@@ -5,6 +5,8 @@ import audioop
 import numpy as np
 import matplotlib.pyplot as plt
 import struct
+from scipy.fft import fft
+
 
 #[Description of chunks]
 #imports - matplotlib is a library that allows to create graphs, wave allows us to work with wav files and to read and write with them. pyaudio is a library that helps to allow the program to tune to the proper hardware capabilites of the computer
@@ -22,7 +24,7 @@ import struct
 # [Chunk]
 #the number of frames that will be set in the buffer/waiting room. Before they are sent out to be played/outputed
 #Correction - the number of samples that will be held in one chunk/portion. In this case we are holding 4096 samples in our chunk to be recorded/held to be played/outputed
-chunk = 1024 * 2
+chunk = 1024*2
 
 
 #[File variable]
@@ -30,7 +32,7 @@ chunk = 1024 * 2
 #rb is the command working in "read" mode in which they interpret the code
 #the information before it is the directory to find the music
 #Remember you \\ example 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav'
-wf = wave.open ( 'C:\\Users\\danie\\Documents\\Github\\Visual-Equalizer\\ツユ Tuyu - ルーザーガール Rūzāgāru Loser Girl.wav' , 'rb')
+wf = wave.open ( 'C:\\Users\\danie\\Documents\\Github\\Visual-Equalizer\\Daydream.wav' , 'rb')
 
 
 #[Portaudio system]
@@ -59,6 +61,7 @@ stream = p.open(format =
                 )
 
 
+
 #[Reading data]
 #In this command I believe we are now trying to interpret the audio of the frames with in the packages/chunks 
 
@@ -70,8 +73,7 @@ data = wf.readframes(chunk)
 #measures the length/size of data 
 #our song got the number of bits working in the file sample, in this example we have 8 bits in our samples
 format = p.get_format_from_width(wf.getsampwidth())
-print(format)
-print(len(data))
+
 
 
 
@@ -100,6 +102,19 @@ fig, ax = plt.subplots()
 
 
 
+for i in data_int:
+    print(data_int[0:i])
+
+#Different graph
+#linspace also creates a array, but how it work is that you give a range of numbers, so our array starts from 0 to the rate which is 44100 samples per second, and the third parameter is there to describe how many values we want in the array.
+# for example if we do np.linspace(0,10,5) that would be an array that goes from 0 to 10 but in only 5 elements so (0,2.5,5,7.5,10)
+#The '-' means the line style so the graph will be ploted with dashed line, while lw is the line width is just how thick the line is
+#x_fft = np.linspace(0,wf.getframerate(), chunk)
+#line_fft, = ax.plot(x_fft, 4 * chunk, '-',lw=2 )
+#ax.set(20, wf.getframerate()/2 )
+
+
+
 #Creating an animated graph
 #Instead of creating a new graph everytime, we will try to update the lines/data itself in the graph instead.
 #NumPy/np is there to create an array 
@@ -110,24 +125,49 @@ fig, ax = plt.subplots()
 # and the third tells the array how many steps/numbers each element in the array is increased by in intervals, but i deleted it since we dont need them in intervals
 #ax.plot just adds data, so x cords and y cords
 
-x = np.arange(0, 4 * chunk)
-line, = ax.plot(x , data_int )
-ax.set_ylim(0,150)
-ax.set_xlim(0,1024/2)
-ax.set_xlabel('samples')
-ax.set_ylabel('volume')
 
+
+#x = np.arange(0, 4 * chunk)
+x_fft = np.linspace(0,wf.getframerate()/2 , 4 * chunk)
+#y_fft = np.linspace(0, data_int)
+
+
+#line, = ax.plot(x , np.random.rand(4*chunk) )
+line_fft, = ax.plot(x_fft, data_int)
+
+#ax.set_ylim(-255,255)
+#ax.set_xlim(0,4096)
+#ax.set_xlabel('samples')
+#ax.set_ylabel('volume')
+
+ax.set_xlim(0,255)
+ax.set_ylim(0,1)
 plt.show(block = False)
 
 
 
-while (data != ''):
+while True:
     stream.write(data)
     data = wf.readframes(chunk)
     data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
-    line.set_ydata(data_int)
+    #line.set_ydata(data_int)
+
+    y_fft = fft(data_int)
+    line_fft.set_ydata(np.abs(y_fft) / (256 * chunk) )
     fig.canvas.draw()
     fig.canvas.flush_events()
+
+
+
+#we are ploting with plt/matplotlib
+#fft is fast fourier transform
+#abs is absolute/only positive numbers
+# in this case we are using sin to solve for 2 times x 
+#plt.plot(np.abs(fft(np.sin(2*x) ) ) )
+
+#//y_fft = fft(data_int)
+#//line_fft.set_ydata(np.abs(y_fft[0::chunk]) * 2 / (256 * chunk))
+
 
 
 #[play stream]
@@ -139,6 +179,7 @@ while (data != ''):
     #//while data != '':
         #//stream.write(data)
         #//data = wf.readframes(chunk)
+
 
 
 #[volume]
