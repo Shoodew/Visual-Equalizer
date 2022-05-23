@@ -22,7 +22,7 @@ import struct
 # [Chunk]
 #the number of frames that will be set in the buffer/waiting room. Before they are sent out to be played/outputed
 #Correction - the number of samples that will be held in one chunk/portion. In this case we are holding 4096 samples in our chunk to be recorded/held to be played/outputed
-chunk = 1024 * 4
+chunk = 1024 * 2
 
 
 #[File variable]
