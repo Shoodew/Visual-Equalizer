@@ -1,12 +1,10 @@
 import pyaudio
 import wave
-import sys
-import audioop
 import numpy as np
 import matplotlib.pyplot as plt
 import struct
 from scipy.fft import fft
-
+import random
 
 #[Description of chunks]
 #imports - matplotlib is a library that allows to create graphs, wave allows us to work with wav files and to read and write with them. pyaudio is a library that helps to allow the program to tune to the proper hardware capabilites of the computer
@@ -102,9 +100,6 @@ fig, ax = plt.subplots()
 
 
 
-for i in data_int:
-    print(data_int[0:i])
-
 #Different graph
 #linspace also creates a array, but how it work is that you give a range of numbers, so our array starts from 0 to the rate which is 44100 samples per second, and the third parameter is there to describe how many values we want in the array.
 # for example if we do np.linspace(0,10,5) that would be an array that goes from 0 to 10 but in only 5 elements so (0,2.5,5,7.5,10)
@@ -133,7 +128,9 @@ x_fft = np.linspace(0,wf.getframerate()/2 , 4 * chunk)
 
 
 #line, = ax.plot(x , np.random.rand(4*chunk) )
-line_fft, = ax.plot(x_fft, data_int)
+line_fft, = ax.plot(x_fft, data_int, color = "black")
+
+
 
 #ax.set_ylim(-255,255)
 #ax.set_xlim(0,4096)
@@ -144,31 +141,38 @@ ax.set_xlim(0,255)
 ax.set_ylim(0,1)
 plt.show(block = False)
 
+colors = 'red','orange','yellow','green','blue','purple','violet'
+t=0
 
-
-while True:
+while (data != ""):
     stream.write(data)
     data = wf.readframes(chunk)
-    data_int = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
+    data_int1 = np.array(struct.unpack(str(4 * chunk) + 'B', data) , dtype ='b' )
+
+    #t = random.randint(0,len(colors)-1)
+
+    ax.spines['bottom'].set_color(colors[t])
+    
+    if (t != len(colors)-1) :
+        t = t + 1
+    else :
+        t = 0
+    
+    for i in data_int1:
+        if data_int1[i] < 120 and data_int1[i] < -120:
+            data_int1[i] = np.pi
     #line.set_ydata(data_int)
 
-    y_fft = fft(data_int)
-    line_fft.set_ydata(np.abs(y_fft) / (256 * chunk) )
-    fig.canvas.draw()
-    fig.canvas.flush_events()
+    y_fft = fft(data_int1)
+    line_fft.set_ydata(np.abs(y_fft) / (512 * chunk))
+    
+    #print(np.abs(y_fft[8191]) / (256 * chunk))
+    try:
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
-
-
-#we are ploting with plt/matplotlib
-#fft is fast fourier transform
-#abs is absolute/only positive numbers
-# in this case we are using sin to solve for 2 times x 
-#plt.plot(np.abs(fft(np.sin(2*x) ) ) )
-
-#//y_fft = fft(data_int)
-#//line_fft.set_ydata(np.abs(y_fft[0::chunk]) * 2 / (256 * chunk))
-
-
+    except struct.error as err:
+        print(err)
 
 #[play stream]
 #now we play the audio 
