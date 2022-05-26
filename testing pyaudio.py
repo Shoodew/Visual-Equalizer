@@ -4,7 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import struct
 from scipy.fft import fft
+import scipy
 import random
+import pandas
 
 #[Description of chunks]
 #imports - matplotlib is a library that allows to create graphs, wave allows us to work with wav files and to read and write with them. pyaudio is a library that helps to allow the program to tune to the proper hardware capabilites of the computer
@@ -30,7 +32,7 @@ chunk = 1024*2
 #rb is the command working in "read" mode in which they interpret the code
 #the information before it is the directory to find the music
 #Remember you \\ example 'C:\\Visual Equaliter\\Visual-Equalizer\\fukashigi no carte (kosu remix).wav'
-wf = wave.open ( 'C:\\Users\\danie\\Documents\\Github\\Visual-Equalizer\\Daydream.wav' , 'rb')
+wf = wave.open ( 'C:\\Users\\danie\\Documents\\Github\\Visual-Equalizer\\myrne-grant-fault-feat-mccall.wav' , 'rb')
 
 
 #[Portaudio system]
@@ -92,11 +94,13 @@ data_int = np.array(struct.unpack(str( 4 * chunk) + 'B', data), dtype ='b')
 #//print(data_int)
 
 
+
 #Creating graph object
 #plt is matploblib but shortened as shown at the top of the file
 #subplotts is a method used to create plots with parameters of rows and columms, and an id/number associated with the graph
 #fig helps to tell the program that we creating a template, and then the ax tells the program that we are creating a square/cell, in which the subplots are there to create the x and y axis
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(facecolor = "black")
+ax.set(facecolor = "black")
 
 
 
@@ -128,9 +132,9 @@ x_fft = np.linspace(0,wf.getframerate()/2 , 4 * chunk)
 
 
 #line, = ax.plot(x , np.random.rand(4*chunk) )
-line_fft, = ax.plot(x_fft, data_int, color = "black")
+line_fft, = ax.plot(x_fft, data_int, color = "#08F7FE")
 
-
+plt.style.use('dark_background')
 
 #ax.set_ylim(-255,255)
 #ax.set_xlim(0,4096)
@@ -139,6 +143,8 @@ line_fft, = ax.plot(x_fft, data_int, color = "black")
 
 ax.set_xlim(0,255)
 ax.set_ylim(0,1)
+ax.set_ylabel("volume",color = "white")
+ax.set_xlabel("samples",color = "white")
 plt.show(block = False)
 
 colors = 'red','orange','yellow','green','blue','purple','violet'
@@ -164,8 +170,9 @@ while (data != ""):
     #line.set_ydata(data_int)
 
     y_fft = fft(data_int1)
-    line_fft.set_ydata(np.abs(y_fft) / (512 * chunk))
-    
+    line_fft.set_ydata(np.abs(y_fft) / (256 * chunk))
+    #ax.fill_between(color = "#08F7FE", alpha = 0.5, x = chunk, y1 = y_fft, y2 = len(y_fft))
+
     #print(np.abs(y_fft[8191]) / (256 * chunk))
     try:
         fig.canvas.draw()
@@ -191,7 +198,6 @@ while (data != ""):
 #it most likely I assume would have to involve the frames, as they contain additional data outside the file's core audio data.
 #however from researching it is based on manipulating the power/voltage that is being sent in the system
 #a command that can help measure power is RMS
-
 
 
 
