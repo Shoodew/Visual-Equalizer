@@ -143,8 +143,8 @@ plt.style.use('dark_background')
 
 ax.set_xlim(0,255)
 ax.set_ylim(0,1)
-ax.set_ylabel("volume",color = "white")
-ax.set_xlabel("samples",color = "white")
+ax.set_ylabel("sideways text",color = "white")
+ax.set_xlabel("text",color = "white")
 plt.show(block = False)
 
 colors = 'red','orange','yellow','green','blue','purple','violet'
